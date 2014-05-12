@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * Created by Юлиан on 13.04.14.
@@ -18,7 +19,7 @@ public class LDA {
 	private double b = 1;
 	private int k;
 	private int numberOfTerms = 0;
-	private int numberOfIterations = 1;
+	private int numberOfIterations = 0;
 
 	private Object2IntOpenHashMap<String> terms;
 
@@ -34,7 +35,7 @@ public class LDA {
 		documents = new ArrayList<>();
 	}
 
-	protected void addDocument(String[] document){
+	public void addDocument(String[] document){
 		ArrayList<String> documentAL = new ArrayList<>();
 		Object2IntOpenHashMap<String> map = new Object2IntOpenHashMap<>();
 		for(String i : document){
@@ -55,13 +56,13 @@ public class LDA {
 		documents.add(documentAL);
 	}
 
-	protected void buildModel(){
+	public void buildModel(){
 //		System.out.println(documents.size());
 		calculateNumberOfTerms();
 		phi = new double[k][numberOfTerms];
 		theta = new double[documents.size()][k];
 		initTopics();
-		for(int i = 0; i < numberOfIterations; i++){
+		for(int i = 0; i < 0; i++){
 //			System.out.println("Iteration: " + i);
 			iteration();
 		}
@@ -222,13 +223,32 @@ public class LDA {
 				for(int topic = 0; topic < k; topic++){
 					sum += phi[topic][term]*queryTheta[topic];
 				}
-				valuePerplexity += 1.0*termOccurrencesInDocument[term]/docSize*Math.log(sum);
+				valuePerplexity += -1.0*termOccurrencesInDocument[term]/docSize*Math.log(sum);
 			}
 		}
 //		System.out.println(valuePerplexity);
-		return valuePerplexity;
+		return Math.exp(valuePerplexity);
 	}
 
+
+	public String numberOfNew(String[] document){
+		HashSet<String> set = new HashSet<>();
+		ArrayList<String> list = new ArrayList<>();
+		for(String i : document){
+			list.add(i);
+			set.add(i);
+		}
+		int newTerm = 0;
+		int oldTerm = 0;
+		for(String i : set)
+			if(!terms.containsKey(i))
+				newTerm+=Collections.frequency(list, i);
+			else
+				oldTerm+=Collections.frequency(list, i);
+		return "   ===   " + newTerm + "   ===   " + 1.0*newTerm/document.length + "   ===   " + oldTerm + "   ===   " + 1.0*oldTerm/document.length;
+
+
+	}
 
 }
 

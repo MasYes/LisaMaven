@@ -24,7 +24,6 @@ import de.intarsys.pdf.content.CSDeviceBasedInterpreter;
 import de.intarsys.pdf.content.CSException;
 import de.intarsys.pdf.content.text.CSTextExtractor;
 import de.intarsys.pdf.cos.COSVisitorException;
-import de.intarsys.pdf.example.common.CommonJPodExample;
 import de.intarsys.pdf.pd.PDDocument;
 import de.intarsys.pdf.pd.PDPage;
 import de.intarsys.pdf.pd.PDPageNode;
@@ -34,6 +33,7 @@ import ru.lisaprog.Common;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
+
 import ru.lisaprog.UnsupportedFormatException;
 
 /**

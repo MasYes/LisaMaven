@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 public class Vector extends Int2DoubleOpenHashMap { //Имхо, наследовать было рационально, ибо создавать класс с 1 полем и оперировать им - не круто.
 	//Java вообще няшка - поменял HashMap<Integer, Double> на это, и всё вообще ок!
-	private double norm = 0.0;
+	private double norm = 1.0;
 
 	public double getNorm(){
 		return norm;

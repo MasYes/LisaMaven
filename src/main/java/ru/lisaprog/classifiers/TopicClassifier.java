@@ -1,5 +1,7 @@
 package ru.lisaprog.classifiers;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import ru.lisaprog.articles.Article;
 import ru.lisaprog.lemmer.Lemmer;
 import ru.lisaprog.sql.SQLQuery;
@@ -69,6 +71,9 @@ public class TopicClassifier {
 //				terms2Topics.get(word).put(udc, terms2Topics.get(word).get(udc) + 1);
 				if(!allTopics.contains(udc))
 					allTopics.add(udc);
+			if(!countOfTopic.containsKey(udc))
+				countOfTopic.put(udc, 0.0);
+			countOfTopic.put(udc, countOfTopic.get(udc) + 1);
 //			}
 		}
 	}
@@ -99,6 +104,13 @@ public class TopicClassifier {
 		}
 		for(String word : removeWords)
 			terms2Topics.remove(word);
+
+
+		double sum = 0;
+		for(String key : countOfTopic.keySet())
+			sum += countOfTopic.get(key);
+		for(String key : countOfTopic.keySet())
+			countOfTopic.put(key, -1*Math.log(countOfTopic.get(key)/sum));
 	}
 
 	/*public void classify(String[] document){ // раскидывает уникальные слова
@@ -138,8 +150,8 @@ public class TopicClassifier {
 		}
 	}*/
 
-	public void classify1(String[] document){ // считаем мат. ожидания
-
+	public void classify(String[] document){ // считаем мат. ожидания
+		System.out.println("888 = " + terms2Topics.keySet().size());
 		HashMap <String, Double> topics = new HashMap<>();
 		for(int i = 0; i < 1; i++){
 			for(String term : document){
@@ -151,12 +163,38 @@ public class TopicClassifier {
 					}
 			}
 		}
-		for(String topic : topics.keySet()){
-			System.out.println(topic + "   ===   " + topics.get(topic));
+
+
+		DoubleArrayList list = new DoubleArrayList(topics.values());
+
+		Collections.sort(list);
+
+		for(int i = 0; i < 3; i++){
+			for(String topic : topics.keySet()){
+				if(topics.get(topic).equals(list.get(list.size() - 1 - i)))
+					System.out.println(topic + "   ===   " + topics.get(topic));
+			}
 		}
-		System.out.println("Topics size = " + topics.size());
+
+		System.out.println("________________________");
+
+		list.clear();
 		for(String topic : topics.keySet())
-			System.out.println(topic + "   ===   " + topics.get(topic)*countOfTopic.get(topic));
+			if(countOfTopic.containsKey(topic))
+				list.add(topics.get(topic)*countOfTopic.get(topic));
+
+		Collections.sort(list);
+
+		for(int i = 0; i < 3; i++){
+			for(String topic : topics.keySet()){
+				if(topics.get(topic)*countOfTopic.get(topic) == list.get(list.size() - 1 - i))
+					System.out.println(topic + "   ===   " + topics.get(topic)*countOfTopic.get(topic));
+			}
+		}
+
+		System.out.println("Topics size = " + topics.size());
+
+		System.out.println("Size of count = " + countOfTopic.keySet().size());
 
 	}
 
@@ -182,7 +220,7 @@ public class TopicClassifier {
 	}
 
 
-	public void classify(String[] document){ // Оппа Марков стайл!
+	public void classify1(String[] document){ // Оппа Марков стайл!
 		try{
 	/*	FileWriter fw = new FileWriter("A:\\probabilities.txt");
 

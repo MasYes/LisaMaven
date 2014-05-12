@@ -21,7 +21,10 @@ public class SaveArticlesYandex { // в идеале - распоточить, �
 		terms = SQLQuery.getWords();
 		File dir = new File("A:\\articles\\YANDEX");
 		for(File folder : dir.listFiles()){
+			if(!folder.getName().equals("519.83"))
+				continue;
 			System.out.println(folder.getName());
+
 			long time = System.currentTimeMillis();
 			if(folder.isDirectory()){
 				ArrayList<ArticleYandex> articleYandexes = new ArrayList<>();
@@ -52,6 +55,7 @@ public class SaveArticlesYandex { // в идеале - распоточить, �
 						}
 				}
 				SQLQuery.saveArticlesYandex(articleYandexes);
+				break;
 			}
 			System.out.println(1.0*(System.currentTimeMillis() - time)/1000);
 //			System.exit(1000);

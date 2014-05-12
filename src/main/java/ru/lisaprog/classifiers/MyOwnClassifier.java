@@ -77,7 +77,7 @@ public class MyOwnClassifier implements Classifier {
 				System.out.println(udc + "  " + SQLQuery.getWordData(i).getWord() + "  " + 1.0*map.get(i)/numberOfUrls + "  " + numberOfUrls);
 			}
 
-			System.out.println("Next UDC");
+			System.out.println("Next udc");
 			if(vector.angle(artVector) < value){
 				value = vector.angle(artVector);
 				best = udc;

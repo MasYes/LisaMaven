@@ -24,7 +24,7 @@ public class Common {
 	public final static int COUNT_THREADS = 1;
 
 	public static void createLog(Exception e){
-		System.out.println("LOG");
+		System.out.println(new Date() + "\nLOG\n");
 		String log = "";
 		for(StackTraceElement elem : e.getStackTrace()){
 			log += elem.toString() + "\n";

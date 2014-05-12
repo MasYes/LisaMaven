@@ -23,10 +23,10 @@ public abstract class ArticleAbstract implements Serializable, ArticleInterface{
 	private String publication;
 	private String title;
 	private String body;
-	private String UDC;
+	public String udc;
 	private TemplateStyle template;
 	private Language lang;
-	private Vector vector;
+	public Vector vector;
 
 	public ArticleAbstract(){
 		mark = 0;
@@ -35,7 +35,7 @@ public abstract class ArticleAbstract implements Serializable, ArticleInterface{
 		publication = "";
 		title = "";
 		body = "";
-		UDC = "";
+		udc = "";
 		template = TemplateStyle.NONE;
 		lang = Language.RU;
 	}
@@ -81,8 +81,9 @@ public abstract class ArticleAbstract implements Serializable, ArticleInterface{
 		this.vector = vect;
 	}
 
-	protected void setUDC(String udc){
-		this.UDC = udc;
+
+	protected void setUdc(String udc){
+		this.udc = udc;
 	}
 
 
@@ -102,8 +103,8 @@ public abstract class ArticleAbstract implements Serializable, ArticleInterface{
 		return title;
 	}
 
-	public String getUDC(){
-		return UDC;
+	public String getUdc(){
+		return udc;
 	}
 
 	public Vector getVector(){

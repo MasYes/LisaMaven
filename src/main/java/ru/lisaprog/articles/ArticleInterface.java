@@ -8,6 +8,7 @@
 package ru.lisaprog.articles;
 
 import ru.lisaprog.TemplateStyle;
+import ru.lisaprog.objects.Vector;
 
 public interface ArticleInterface {
 	boolean equals(ArticleAbstract article); // mb if title equals - true?
@@ -15,5 +16,5 @@ public interface ArticleInterface {
 	//double closeness(ArticleAbstract article); //distance between two article
 	TemplateStyle getTemplate();
 	String getTitle();
-
+	Vector getVector();
 }

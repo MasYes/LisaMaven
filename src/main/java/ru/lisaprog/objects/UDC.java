@@ -18,7 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.Scanner;
 
 public class UDC {
-	private String id;
+	public String id;
 	private String description;
 	private String parent;
 	private String children;
@@ -37,6 +37,14 @@ public class UDC {
 		this.description = descr;
 		this.parent = par;
 		this.children = childr;
+	}
+
+	public String getChildren(){
+		return this.children;
+	}
+
+	public String getParent() {
+		return parent;
 	}
 
 	private boolean exist(String str){
@@ -275,7 +283,7 @@ public class UDC {
 		double aw_an = 0;
 		double aw_pr = 0;
 		for(Code c : codes){
-//			System.out.println("\n" + SQLQuery.getUDC(c.udc).description + "\n" +c.udc + "  ===  " + vect.distanse(SQLQuery.getUDCVector(c.udc), c.udc) + "  ===  " + vect.angle(SQLQuery.getUDCVector(c.udc)) + "  ===  " + vect.crossingSize(SQLQuery.getUDCVector(c.udc)) + "  ===  " + c.likelihood);
+//			System.out.println("\n" + SQLQuery.getUdc(c.udc).description + "\n" +c.udc + "  ===  " + vect.distanse(SQLQuery.getUDCVector(c.udc), c.udc) + "  ===  " + vect.angle(SQLQuery.getUDCVector(c.udc)) + "  ===  " + vect.crossingSize(SQLQuery.getUDCVector(c.udc)) + "  ===  " + c.likelihood);
 			aw_an += vect.angle(SQLQuery.getUDCVector(c.udc));
 			aw_pr += c.likelihood;
 		}

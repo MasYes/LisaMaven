@@ -10,11 +10,12 @@ package ru.lisaprog.sql;
  * а потом вызвать rs.close(), что несколько снижает затраты оперативной (вроде).
  * Засунуть все коннекты в "трай витх ресорс"
  *
- * CREATE TABLE lisa.articles(id int primary key auto_increment, author text, title text, vector long binary, UDC text, Template text, link text,
+ * CREATE TABLE lisa.articles(id int primary key auto_increment, author text, title text, vector long binary, udc text, Template text, link text,
  mark int, language text, info text, publication text);
  *
  */
 
+import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -92,10 +93,11 @@ public class SQLQuery {
 		Vector vect = new Vector();
 		vect.setNorm(Double.parseDouble(str.substring(0, str.indexOf("!"))));
 		str = str.substring(str.indexOf("!") + 1);
-		for(String i : str.split(";")){
-			vect.put(Integer.parseInt(i.substring(0, i.indexOf(":"))),
-					Double.parseDouble(i.substring(i.indexOf(":") + 1)));
-		}
+		if(str.split(";").length > 1)
+			for(String i : str.split(";")){
+				vect.put(Integer.parseInt(i.substring(0, i.indexOf(":"))),
+						Double.parseDouble(i.substring(i.indexOf(":") + 1)));
+			}
 		return vect;
 	}
 
@@ -176,12 +178,12 @@ public class SQLQuery {
 			if(!connected)
 				connect();
 			PreparedStatement ps = conn.prepareStatement("INSERT INTO lisa.articles " +
-					"(author, title, vector, UDC, Template," +
+					"(author, title, vector, udc, Template," +
 					"link, mark, language, info,  publication) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 			ps.setString(1, article.getAuthor());
 			ps.setString(2, article.getTitle());
 			ps.setString(3, serialize(article.getVector()));
-			ps.setString(4, article.getUDC());
+			ps.setString(4, article.getUdc());
 			ps.setString(5, article.getTemplate().toString());
 			ps.setString(6, article.getLink());
 			ps.setInt(7, article.getMark());
@@ -200,9 +202,9 @@ public class SQLQuery {
 		try{
 			if(!connected)
 				connect();
-			String query = "INSERT INTO lisa.articleYandex (udc, rank, vector) VALUES ";
+			String query = "INSERT INTO lisa.articleYandex (udc, rank, vector, perplexity) VALUES ";
 			for(ArticleYandex article : articles){
-				query += "('" + article.udc + "'," + article.rank + ",'" + serialize(article.vector) + "'),";
+				query += "('" + article.udc + "'," + article.rank + ",'" + serialize(article.vector) + "', " + article.perplexity + "),";
 			}
 
 //			System.out.println("Saving articles");
@@ -219,19 +221,56 @@ public class SQLQuery {
 
 	public static ArrayList<ArticleYandex> getArticlesYandex(String where){
 		try{
+			if(connected)
+				disconnect();
 			if(!connected)
 				connect();
 			ArrayList<ArticleYandex> result = new ArrayList<>();
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery("SELECT * FROM lisa.articleYandex WHERE " + where + ";");
 			while(rs.next()){
-				result.add(new ArticleYandex(rs.getString("udc"), rs.getString("rank"), deserialize(rs.getString("vector"))));
+				result.add(new ArticleYandex(rs.getString("udc"), rs.getString("rank"), deserialize(rs.getString("vector")), rs.getDouble("perplexity")));
 			}
 			return result;
 		} catch (SQLException e){
 			Common.createLog(e);
 			return new ArrayList<>();
 		}
+	}
+
+	public static ArrayList<String> getArticlesYandexUDCs(){
+		try{
+			if(!connected)
+				connect();
+			ArrayList<String> result = new ArrayList<>();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT DISTINCT(udc) FROM lisa.articleYandex;");
+			while(rs.next()){
+				result.add(rs.getString("udc"));
+			}
+			return result;
+		} catch (SQLException e){
+			Common.createLog(e);
+			return new ArrayList<>();
+		}
+	}
+
+	public static void savePerplexity(String udc, String rank, double perplexity){
+
+		try{
+			if(!connected)
+				connect();
+			PreparedStatement ps = conn.prepareStatement("UPDATE lisa.articleyandex SET perplexity = " + perplexity + " " +
+					"WHERE udc = '" + udc + "' AND rank = '" + rank + "';");
+
+			ps.executeUpdate();
+			ps.close();
+		} catch (SQLException e){
+			Common.createLog(e);
+		}
+
+
+
 	}
 
 
@@ -601,6 +640,23 @@ public class SQLQuery {
 		}
 	}
 
+	public static ArrayList<String> getListOfUDCs(){
+		try{
+			if(!connected)
+				connect();
+			ArrayList<String> results = new ArrayList<>();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT DISTINCT(id) FROM lisa.udc;");
+			while(rs.next()){
+				results.add(rs.getString("id"));
+			}
+			return results;
+		} catch (Exception e){
+			Common.createLog(e);
+			return new ArrayList<>();
+		}
+	}
+
 	public static HashSet<String> getUDCByParent(String parent){
 		try{
 			if(!connected)
@@ -897,7 +953,78 @@ public class SQLQuery {
 	}
 
 //-----------------------------------------------------------------------
-//------------------------------Устаревшие------------------------------7
+//----------------------------------MI----------------------------------7
+//-----------------------------------------------------------------------
+
+
+	public static void saveMutualInformation(HashMap<String, Int2DoubleOpenHashMap> mi){
+		try{
+			if(!connected)
+				connect();
+			String query = "INSERT INTO lisa.mutual_information (udc, term_id, mi) VALUES ";
+			int count = 0;
+			for(String udc : mi.keySet())
+				for(int termId : mi.get(udc).keySet()){
+					if(mi.get(udc).get(termId) >= 0.0001){
+						count++;
+						query += "('" + udc + "', " + termId + ", " + mi.get(udc).get(termId)  + "),";
+					}
+					if(count >= 5000){
+						query = query.substring(0, query.length() - 1);
+						PreparedStatement ps = conn.prepareStatement(query + ";");
+						ps.executeUpdate();
+						ps.close();
+						query = "INSERT INTO lisa.mutual_information (udc, term_id, mi) VALUES ";
+						count = 0;
+					}
+				}
+
+			if(count > 0){
+				query = query.substring(0, query.length() - 1);
+				PreparedStatement ps = conn.prepareStatement(query + ";");
+				ps.executeUpdate();
+				ps.close();
+			}
+
+		}catch(Exception e){
+			Common.createLog(e);
+		}
+	}
+
+	public static double getMutualInformation(String udc, int term){
+		try{
+			if(!connected)
+				connect();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT mi FROM lisa.mutual_information WHERE udc=\'" + udc + "\' AND term_id = " + term + ";");
+			rs.next();
+			return rs.getDouble("mi");
+		}catch(Exception e){
+			return 0;
+		}
+	}
+
+	public static IntOpenHashSet getMutualInformationWithLimitMI(String udc, double limit){
+		try{
+			if(!connected)
+				connect();
+			IntOpenHashSet result = new IntOpenHashSet();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT term_id FROM lisa.mutual_information WHERE udc=\'" + udc + "\' AND MI >= " + limit + ";");
+			while(rs.next()){
+				result.add(rs.getInt("term_id"));
+			}
+			return result;
+		}catch(Exception e){
+			return new IntOpenHashSet();
+		}
+	}
+
+
+
+
+//-----------------------------------------------------------------------
+//------------------------------Устаревшие------------------------------8
 //-----------------------------------------------------------------------
 
 

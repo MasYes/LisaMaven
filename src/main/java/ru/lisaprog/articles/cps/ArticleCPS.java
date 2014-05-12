@@ -37,7 +37,7 @@ public class ArticleCPS extends ArticleAbstract {
 		setTemplate(TemplateStyle.CPS);
 		setVector();
 		setPublication("Процессы управления и устойчивость");
-		setUDC("");
+		setUdc("");
 		setLink("http://www.apmath.spbu.ru/ru/research/conference/pm/archive/");
 		setMark(-1);
 		setLanguage(Language.RU);

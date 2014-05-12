@@ -36,7 +36,7 @@ public class ArticleCyberleninka extends ArticleAbstract {
 			setMark(-1);
 			setVector(Vector.toVector(Lemmer.lemmer(str)));
 			if(codes.contains("УДК:")){
-				setUDC(codes.substring(codes.indexOf("УДК:") + 4));
+				setUdc(codes.substring(codes.indexOf("УДК:") + 4));
 			}
 		} catch (IOException e){
 			Common.createLog(e);

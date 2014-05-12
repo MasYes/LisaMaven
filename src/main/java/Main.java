@@ -1,7 +1,15 @@
+import ru.lisaprog.articles.*;
 import ru.lisaprog.classifiers.*;
+import ru.lisaprog.articles.yandex.*;
 
 import java.lang.* ;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 
+import javolution.text.TypeFormat;
+import ru.lisaprog.objects.Vector;
+import weka.classifiers.functions.LibSVM;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,10 +25,7 @@ import java.lang.* ;
  */
 public class Main {
 	public static void main(String[] args)throws Exception{
-		//MulticlassSVM.test();
-		//LDA lda = new LDA(1, 0.01, 50);
-		TopicClassifier.test();
-//		SaveArticlesYandex.saveArticles();
+//		SVM.test();
 	}
 }
 
