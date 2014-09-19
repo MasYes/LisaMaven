@@ -58,7 +58,7 @@ public class UDC {
 		return true;
 	}
 
-	private static HashSet<String> normalize(String code){
+	public static HashSet<String> normalize(String code){
 		try{
 		//ВНИМАНИЕ! Заработало как надо с 1 раза.
 		//Этот кусок и все сопутствующие функции

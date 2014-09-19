@@ -7,6 +7,7 @@ import ru.lisaprog.lemmer.Lemmer;
 import ru.lisaprog.sql.SQLQuery;
 import ru.lisaprog.objects.Term;
 
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -15,7 +16,9 @@ import java.util.*;
 /**
  * Created by Юлиан on 19.04.14.
  */
-public class TopicClassifier {
+public class TopicClassifier implements Classifier {
+
+	public String findUDC(Article article, HashSet<String> UDCs){return "";}
 
 	public static void test() throws Exception{
 //		Article article = new Article("A:\\Examples\\example9.pdf");
@@ -51,6 +54,7 @@ public class TopicClassifier {
 	private HashMap<String, HashMap<String, Double>> terms2Topics;
 	private ArrayList<String> allTopics;
 	private HashMap<String, Double> countOfTopic = new HashMap<>();
+	public double alpha = 10;
 
 	public TopicClassifier(){
 		terms2Topics = new HashMap<>();
@@ -150,8 +154,7 @@ public class TopicClassifier {
 		}
 	}*/
 
-	public void classify(String[] document){ // считаем мат. ожидания
-		System.out.println("888 = " + terms2Topics.keySet().size());
+	public String classify(String[] document){ // считаем мат. ожидания
 		HashMap <String, Double> topics = new HashMap<>();
 		for(int i = 0; i < 1; i++){
 			for(String term : document){
@@ -169,10 +172,16 @@ public class TopicClassifier {
 
 		Collections.sort(list);
 
-		for(int i = 0; i < 3; i++){
+
+		String result = "4;";
+
+		for(int i = 0; i < 0; i++){
 			for(String topic : topics.keySet()){
-				if(topics.get(topic).equals(list.get(list.size() - 1 - i)))
-					System.out.println(topic + "   ===   " + topics.get(topic));
+				if(topics.get(topic).equals(list.get(list.size() - 1 - i))){
+//					result += topic + ";";
+
+//					System.out.println(topic + "   ===   " + topics.get(topic));
+				}
 			}
 		}
 
@@ -185,17 +194,20 @@ public class TopicClassifier {
 
 		Collections.sort(list);
 
-		for(int i = 0; i < 3; i++){
+		for(int i = 0; i < 9; i++){
 			for(String topic : topics.keySet()){
-				if(topics.get(topic)*countOfTopic.get(topic) == list.get(list.size() - 1 - i))
+
+				if(topics.get(topic)*countOfTopic.get(topic) == list.get(list.size() - 1 - i)){
+					result += topic + ";";
 					System.out.println(topic + "   ===   " + topics.get(topic)*countOfTopic.get(topic));
+				}
 			}
 		}
+//		System.out.println("Topics size = " + topics.size());
 
-		System.out.println("Topics size = " + topics.size());
+//		System.out.println("Size of count = " + countOfTopic.keySet().size());
 
-		System.out.println("Size of count = " + countOfTopic.keySet().size());
-
+		return result;
 	}
 
 	private void readProbabilitiesFromFile(File file) throws Exception{
@@ -329,6 +341,90 @@ public class TopicClassifier {
 		}*/
 
 
+
+
+
+	}
+
+
+	public String classify3(String[] document){ // Оппа Марков стайл!
+
+
+		HashMap <String, Double> topics = new HashMap<>();
+
+		for(int termId = 0; termId < document.length; termId++){
+			String term = document[termId];
+			if(terms2Topics.containsKey(term)){
+				double[] probabilities = new double[allTopics.size()];
+				for(String topic : terms2Topics.get(term).keySet()){
+					if(!topics.containsKey(topic))
+						topics.put(topic, 0.0);
+					probabilities[allTopics.indexOf(topic)] += terms2Topics.get(term).get(topic);
+
+					if(termId > 0 && terms2Topics.containsKey(document[termId - 1]) && terms2Topics.get(document[termId - 1]).containsKey(topic))
+						probabilities[allTopics.indexOf(topic)] += alpha*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId-1]).get(topic);
+//					if(termId > 1 && terms2Topics.containsKey(document[termId - 2]) && terms2Topics.get(document[termId - 2]).containsKey(topic))
+//						probabilities[allTopics.indexOf(topic)] += alpha*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId-2]).get(topic);
+//					if(termId > 2 && terms2Topics.containsKey(document[termId - 3]) && terms2Topics.get(document[termId - 3]).containsKey(topic))
+//						topics.put(topic, topics.get(topic) + alpha/3*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId-3]).get(topic));
+					if(termId < document.length - 1 && terms2Topics.containsKey(document[termId + 1]) && terms2Topics.get(document[termId + 1]).containsKey(topic))
+						probabilities[allTopics.indexOf(topic)] += alpha*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId+1]).get(topic);
+//					if(termId < document.length - 2 && terms2Topics.containsKey(document[termId + 2]) && terms2Topics.get(document[termId + 2]).containsKey(topic))
+//						probabilities[allTopics.indexOf(topic)] += alpha*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId+2]).get(topic);
+//					if(termId < document.length - 3 && terms2Topics.containsKey(document[termId + 3]) && terms2Topics.get(document[termId + 3]).containsKey(topic))
+//						topics.put(topic, topics.get(topic) + alpha/3*terms2Topics.get(term).get(topic)*terms2Topics.get(document[termId+3]).get(topic));
+				}
+				probabilities = normalize(probabilities);
+				for(int i = 0; i < probabilities.length; i++){
+					if(probabilities[i] > 0){
+						if(!topics.containsKey(allTopics.get(i)))
+							topics.put(allTopics.get(i), 0.0);
+						topics.put(allTopics.get(i), topics.get(allTopics.get(i)) +  probabilities[i]);
+					}
+
+				}
+			}
+		}
+
+
+		DoubleArrayList list = new DoubleArrayList(topics.values());
+
+		Collections.sort(list);
+
+
+		String result = "4;";
+
+		for(int i = 0; i < 1; i++){
+			for(String topic : topics.keySet()){
+				if(topics.get(topic).equals(list.get(list.size() - 1 - i))){
+//					result += topic + ";";
+					System.out.println(topic + "   ===   " + topics.get(topic));
+				}
+			}
+		}
+
+		System.out.println("________________________");
+
+		list.clear();
+		for(String topic : topics.keySet())
+			if(countOfTopic.containsKey(topic))
+				list.add(topics.get(topic)*countOfTopic.get(topic));
+
+		Collections.sort(list);
+
+		for(int i = 0; i < 1; i++){
+			for(String topic : topics.keySet()){
+				if(topics.get(topic)*countOfTopic.get(topic) == list.get(list.size() - 1 - i)){
+					result += topic + ";";
+					System.out.println(topic + "   ===   " + topics.get(topic)*countOfTopic.get(topic));
+				}
+			}
+		}
+//		System.out.println("Topics size = " + topics.size());
+
+//		System.out.println("Size of count = " + countOfTopic.keySet().size());
+
+		return result;
 
 
 

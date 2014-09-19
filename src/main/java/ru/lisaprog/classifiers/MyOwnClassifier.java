@@ -16,8 +16,12 @@ import java.util.HashSet;
  */
 public class MyOwnClassifier implements Classifier {
 
+	public String classify(String[] document){return "";}
+
 	public String findUDC(Article article, HashSet<String> UDCs){
 		double value = 1.6;
+
+
 
 		Vector artVector = article.vector;
 

@@ -3,6 +3,7 @@ package ru.lisaprog.articles.yandex;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 /**
  * Created by Юлиан on 12.04.14.
@@ -17,6 +18,7 @@ public class ReadArticleYandex implements Runnable{
 	}
 
 	public void run(){
+
 		try{
 			BufferedReader reader = new BufferedReader(new FileReader(file));
 			String line;

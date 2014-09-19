@@ -1,5 +1,6 @@
 package ru.lisaprog.classifiers;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.ints.Int2DoubleOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -9,6 +10,7 @@ import ru.lisaprog.objects.Vector;
 import ru.lisaprog.sql.SQLQuery;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -22,10 +24,96 @@ import java.util.HashSet;
  */
 public class Rocchio implements Classifier {
 
-	private static ArrayList<String> parents = new ArrayList<>();
-	private static Int2IntOpenHashMap df;
-	private static Int2DoubleOpenHashMap idf;
+	private static HashMap<String, Vector> documents = new HashMap<>();
 
+	private static HashMap<String, Vector> conceptsWeights = new HashMap<>();
+
+	private static ArrayList<String> parents = new ArrayList<>();
+	private static Int2IntOpenHashMap tf = new Int2IntOpenHashMap();
+	private static Int2IntOpenHashMap df = new Int2IntOpenHashMap();
+
+	private int N = 0;
+
+	public String findUDC(Article a, HashSet<String> s){
+		return "";
+	}
+
+	public String classify(String[] document) throws Exception{
+		return classify(Vector.toVector(document));
+	}
+
+	public void addVector(String udc, Vector vector){
+		if(!documents.containsKey(udc))
+			documents.put(udc, new Vector());
+		documents.get(udc).add(vector);
+		for(int i : vector.keySet()){
+			if(!df.containsKey(i)){
+				df.put(i, 0);
+				tf.put(i, 0);
+			}
+			df.put(i, df.get(i) + 1);
+			tf.put(i, tf.get(i) + (int)Math.round(vector.get(i)*vector.getNorm()));
+		}
+		N++;
+	}
+
+
+	public void buildClassifier(){
+		for(String key : documents.keySet()){
+			Vector concept = new Vector();
+			Vector vector = documents.get(key);
+			for(int i : vector.keySet()){
+				concept.put(i, Math.log(vector.get(i)*vector.getNorm() + 1)*Math.log(1.0 * N / df.get(i)));
+			}
+			double sum = 0;
+			for(int i : vector.keySet()){
+				sum += concept.get(i)*concept.get(i);
+			}
+			sum = Math.sqrt(sum);
+			for(int i : vector.keySet()){
+				concept.put(i, concept.get(i)*concept.getNorm()/sum);
+			}
+			concept.normalize();
+			conceptsWeights.put(key, concept);
+		}
+	}
+
+
+
+
+
+
+	private String classify(Vector vector){
+		String result = "4;";
+		double min = 100500.0;
+		Vector newVector = new Vector();
+		for(int i : vector.keySet()){
+			if(df.get(i) > 0)
+				newVector.put(i, Math.log(vector.get(i)*vector.getNorm() + 1)*Math.log(1.0 * N / df.get(i)));
+		}
+		newVector.normalize();
+		DoubleArrayList list = new DoubleArrayList();
+		for(String udc : conceptsWeights.keySet()){
+//			System.out.println("Angle = " + newVector.angle(conceptsWeights.get(udc)));
+			list.add(newVector.angle(conceptsWeights.get(udc)));
+		}
+		Collections.sort(list);
+		for(int i = 0; i < 1; i++){
+			for(String udc : conceptsWeights.keySet()){
+				if(newVector.angle(conceptsWeights.get(udc)) == list.get(i)){
+					result += udc + ";";
+				}
+			}
+		}
+
+		return result;
+	}
+
+
+
+
+
+	/*
 	private static void getParents(){
 		parents = SQLQuery.getDistinctParents();
 	}
@@ -103,7 +191,7 @@ public class Rocchio implements Classifier {
 			Vector vect = SQLQuery.rocchioGetUDCWeights(i);
 			System.out.println(i + "  ==  " + Vector.radToGrad(vect.angle(art)));
 		}
-		/*Vector vect = SQLQuery.rocchioGetUDCWeights("519.8");
+		Vector vect = SQLQuery.rocchioGetUDCWeights("519.8");
 		IntOpenHashSet set = new IntOpenHashSet(vect.keySet());
 		set.retainAll(article.vector.keySet());
 		System.out.println("size = " + vect.size());
@@ -123,7 +211,7 @@ public class Rocchio implements Classifier {
 		double fullsum = 0;
 		for(int key : vect.keySet()){
 			fullsum += vect.get(key);
-		}*/
+		}
 
 
 		//System.out.println(sum);
@@ -154,7 +242,7 @@ public class Rocchio implements Classifier {
 		}
 		weights.normalize();
 		return weights;
-	}
+	}*/
 
 }
 

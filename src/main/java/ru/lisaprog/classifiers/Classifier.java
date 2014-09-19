@@ -1,6 +1,7 @@
 package ru.lisaprog.classifiers;
 
 import ru.lisaprog.articles.Article;
+import ru.lisaprog.objects.Vector;
 
 import java.util.HashSet;
 
@@ -10,7 +11,7 @@ import java.util.HashSet;
 public interface Classifier {
 	public String findUDC(Article article, HashSet<String> UDCs);
 
-
+	public String classify(String[] document) throws Exception;
 
 
 //	public void addDocument(String udc, Vector vector);

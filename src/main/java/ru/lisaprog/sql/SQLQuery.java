@@ -276,6 +276,8 @@ public class SQLQuery {
 
 	public static String getArticleUDC(int i){
 		try{
+			if(connected)
+				disconnect();
 			if(!connected)
 				connect();
 			Statement stmt = conn.createStatement();
@@ -430,8 +432,6 @@ public class SQLQuery {
 
 	public static int getIdWord(String word){
 		try{
-			if(connected)
-				disconnect();
 			if(!connected)
 				connect();
 			Statement stmt = conn.createStatement();
@@ -680,9 +680,29 @@ public class SQLQuery {
 				connect();
 			IntArrayList results = new IntArrayList();
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT id FROM lisa.articles WHERE length(udc) < 10 AND udc like \" " +parent +  "%\";");
+			ResultSet rs = stmt.executeQuery("SELECT id FROM lisa.articles WHERE udc like \" " +parent +  "%\";");
 			while(rs.next()){
 				results.add(Integer.parseInt(rs.getString("id")));
+			}
+			return results;
+		} catch (Exception e){
+			Common.createLog(e);
+			return new IntArrayList();
+		}
+	}
+
+	public static IntArrayList getArticlesForTests(String[] udcs){
+		try{
+			if(!connected)
+				connect();
+			IntArrayList results = new IntArrayList();
+			for(String udc : udcs){
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery("SELECT id FROM lisa.articles WHERE udc like \" " +udc +  "%\";");// length(udc) < 20
+				int size = 0;
+				while(rs.next()){
+					results.add(Integer.parseInt(rs.getString("id")));
+				}
 			}
 			return results;
 		} catch (Exception e){
@@ -1127,6 +1147,30 @@ public class SQLQuery {
 		} catch (SQLException e){
 			//Common.createLog(e); и это забивает тоже ><
 			return null;
+		}
+	}
+
+
+
+	@Deprecated
+	public static double averageNumberOfChildren(){
+		try{
+			int i = 0;
+			int number = 0;
+			if(!connected)
+				connect();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT * FROM udc");
+			while(rs.next()){
+				if(rs.getString("children").length() > 0){
+					i += rs.getString("children").split(";").length;
+					number++;
+				}
+			}
+			return 1.0*i/number;
+		} catch (SQLException e){
+			//Common.createLog(e); и это забивает тоже ><
+			return -1;
 		}
 	}
 

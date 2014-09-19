@@ -2,9 +2,10 @@ package ru.lisaprog.classifiers;
 
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import ru.lisaprog.Common;
 import weka.core.*;
 
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ public class WekaInstance {
 	public void addVector(String udc, Vector vector){
 		if(!vectors.containsKey(udc))
 			vectors.put(udc, new ArrayList<Vector>());
+//		for(Vector subVector : splitIntoVectors(vector))
 		vectors.get(udc).add(vector);
 		for(int i : vector.keySet()){
 			if(!old2newTermId.containsKey(i))
@@ -78,9 +80,7 @@ public class WekaInstance {
 		for(int i : list){
 			result.indexes[num] = i;
 			result.values[num++] = vector.get(i)*vector.getNorm()/sum;
-//			System.out.print(i + ":" + vector.getNorm()*vector.get(i)/sum + " ");
 		}
-//		System.exit(10);
 		return result;
 	}
 
@@ -92,6 +92,38 @@ public class WekaInstance {
 		}
 		result.normalize();
 		return result;
+	}
+
+/*	private ArrayList<Vector> splitIntoVectors(Vector vector){
+		int partitionSize = 10050000;
+		Vector subVector = new Vector();
+		ArrayList<Vector> result = new ArrayList<>();
+		int count = 0;
+		for(int i : vector.keySet()){
+			count++;
+			subVector.put(i, vector.get(i)*vector.getNorm());
+			if(count == partitionSize){
+				result.add(subVector);
+				subVector.normalize();
+				subVector = new Vector();
+				count = 0;
+			}
+		}
+		if(count > 0){
+			subVector.normalize();
+			result.add(subVector);
+		}
+		return result;
+	}*/
+
+	protected void saveInstanceInFile(String fileName){
+		try{
+			FileWriter fw = new FileWriter("A:\\SVMTests\\" + fileName + ".arff");
+			fw.write(this.instances.toString());
+			fw.close();
+		}catch(Exception e){
+			Common.createLog(e);
+		}
 	}
 
 	private static class Couple{
