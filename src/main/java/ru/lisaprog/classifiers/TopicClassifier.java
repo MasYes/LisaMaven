@@ -4,8 +4,9 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleOpenHashSet;
 import ru.lisaprog.articles.Article;
 import ru.lisaprog.lemmer.Lemmer;
+import ru.lisaprog.objects.*;
+import ru.lisaprog.objects.Vector;
 import ru.lisaprog.sql.SQLQuery;
-import ru.lisaprog.objects.Term;
 
 
 import java.io.BufferedReader;
@@ -469,6 +470,10 @@ public class TopicClassifier implements Classifier {
 			if(terms2Topics.containsKey(i))
 				str+=i+";";
 		return str.split(";");
+	}
+
+	public String classify(Vector vector) throws Exception{
+		throw new IllegalStateException();//просто потому, что этого метода тут толком нет
 	}
 
 }

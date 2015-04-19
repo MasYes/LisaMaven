@@ -40,6 +40,7 @@ public class WekaInstance {
 		}
 	}
 
+
 	public void createInstance(){
 		for(int i = 0; i <= old2newTermId.size(); i++)
 			attributes.add(new Attribute("term_" + i));

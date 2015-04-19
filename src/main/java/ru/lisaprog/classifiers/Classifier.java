@@ -13,10 +13,9 @@ public interface Classifier {
 
 	public String classify(String[] document) throws Exception;
 
-
 //	public void addDocument(String udc, Vector vector);
 
-//	public String classify(Vector vector);
+	public String classify(Vector vector) throws Exception;
 
-//	public void buildClassifier();
+	public void buildClassifier() throws Exception;
 }

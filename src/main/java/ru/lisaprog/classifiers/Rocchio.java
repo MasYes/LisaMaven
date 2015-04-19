@@ -28,7 +28,6 @@ public class Rocchio implements Classifier {
 
 	private static HashMap<String, Vector> conceptsWeights = new HashMap<>();
 
-	private static ArrayList<String> parents = new ArrayList<>();
 	private static Int2IntOpenHashMap tf = new Int2IntOpenHashMap();
 	private static Int2IntOpenHashMap df = new Int2IntOpenHashMap();
 
@@ -83,9 +82,8 @@ public class Rocchio implements Classifier {
 
 
 
-	private String classify(Vector vector){
-		String result = "4;";
-		double min = 100500.0;
+	public String classify(Vector vector){
+		String result = "";
 		Vector newVector = new Vector();
 		for(int i : vector.keySet()){
 			if(df.get(i) > 0)
@@ -101,7 +99,7 @@ public class Rocchio implements Classifier {
 		for(int i = 0; i < 1; i++){
 			for(String udc : conceptsWeights.keySet()){
 				if(newVector.angle(conceptsWeights.get(udc)) == list.get(i)){
-					result += udc + ";";
+					result += udc;
 				}
 			}
 		}

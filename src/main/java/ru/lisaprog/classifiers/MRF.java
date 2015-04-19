@@ -39,6 +39,10 @@ public class MRF implements Classifier{
 		this.miLimit = miLimit;
 	}
 
+	public void buildClassifier() throws Exception{
+		buildClassifiers();
+	}
+
 	public void buildClassifiers() throws Exception{
 		terms = new IntOpenHashSet();
 

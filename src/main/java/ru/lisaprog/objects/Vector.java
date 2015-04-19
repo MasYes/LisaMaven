@@ -26,6 +26,14 @@ public class Vector extends Int2DoubleOpenHashMap { //Имхо, наследов
 	//Java вообще няшка - поменял HashMap<Integer, Double> на это, и всё вообще ок!
 	private double norm = 1.0;
 
+	public Vector(){
+		super();
+	}
+
+	public Vector(Int2DoubleOpenHashMap map){
+		super(map);
+	}
+
 	public double getNorm(){
 		return norm;
 	}

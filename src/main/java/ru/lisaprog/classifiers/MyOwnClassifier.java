@@ -14,7 +14,7 @@ import java.util.HashSet;
 /**
  * Created by Юлиан on 04.04.14.
  */
-public class MyOwnClassifier implements Classifier {
+public class MyOwnClassifier {
 
 	public String classify(String[] document){return "";}
 

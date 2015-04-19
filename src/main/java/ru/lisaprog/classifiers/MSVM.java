@@ -43,6 +43,10 @@ public class MSVM implements Classifier{
 		this.miLimit = miLimit;
 	}
 
+	public void buildClassifier() throws Exception{
+		buildClassifiers();
+	}
+
 	public void buildClassifiers() throws Exception{
 		terms = new IntOpenHashSet();
 

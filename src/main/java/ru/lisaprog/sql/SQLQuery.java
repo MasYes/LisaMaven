@@ -51,20 +51,21 @@ public class SQLQuery {
 
 	private static void connect() throws SQLException {
 
-	conn = DriverManager.getConnection(
-			"jdbc:mysql://" + url + ":" + port + "/" + DB,
-			user, password);
-	if (conn == null) {
-		System.out.println("Нет соединения с БД!");
+		conn = DriverManager.getConnection(
+				"jdbc:mysql://" + url + ":" + port + "/" + DB,
+				user, password);
+		if (conn == null) {
+			System.out.println("Нет соединения с БД!");
+		}
+		else connected = true;
 	}
-	else connected = true;
-}
 
 	public static void disconnect() throws SQLException {
 		//На самом деле я не хотел делать эту функцию, но
 		//если иногда не закрывать соединение, то объём используемой
 		//оперативки приводит к аутофмемори
-		conn.close();
+		if(connected)
+			conn.close();
 		connected = false;
 	}
 
@@ -1040,11 +1041,56 @@ public class SQLQuery {
 		}
 	}
 
+//-----------------------------------------------------------------------
+//---------------------------------ROMIP--------------------------------7
+//-----------------------------------------------------------------------
+
+	public static void saveArticlesRomip(HashMap<String, Vector> map){
+		try{
+			if(!connected)
+				connect();
+			StringBuilder query = new StringBuilder();
+			query.append("INSERT INTO romip_legal_2007 (original_id, vector) VALUES ");
+
+			int i = 0;
+			for(String key : map.keySet()){
+				if(i++ == 0){
+					query.append("(\"").append(key).append("\",\"").append(serialize(map.get(key))).append("\")");
+				}
+				else{
+					query.append(",(\"").append(key).append("\",\"").append(serialize(map.get(key))).append("\")");
+				}
+			}
+			PreparedStatement ps = conn.prepareStatement(query.toString() + ";");
+			ps.executeUpdate();
+			ps.close();
+			disconnect();
+		} catch (SQLException e){
+			Common.createLog(e);
+		}
+	}
+
+
+	public static Vector getArticleRomip(String id){
+		try{
+			if(!connected)
+				connect();
+
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT vector FROM lisa.romip_legal_2007 WHERE original_id = \"" + id + "\";");
+			rs.next();
+			return deserialize(rs.getString("vector"));
+		} catch (SQLException e){
+//			Common.createLog(e);//реально некоторые документы отсутствуют 0о
+			return null;
+		}
+	}
+
 
 
 
 //-----------------------------------------------------------------------
-//------------------------------Устаревшие------------------------------8
+//------------------------------Устаревшие------------------------------9
 //-----------------------------------------------------------------------
 
 
